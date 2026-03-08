@@ -23,8 +23,10 @@ class TogglClient
   end
 
   def today_entries
-    today = Time.now.strftime("%Y-%m-%d")
-    get("/me/time_entries", start_date: today, end_date: today)
+    today = Time.now
+    start_date = today.strftime("%Y-%m-%d")
+    end_date = (today + 86400).strftime("%Y-%m-%d")
+    get("/me/time_entries", start_date: start_date, end_date: end_date)
   end
 
   def create_entry(description:, project_id: nil, tags: nil, start: nil, duration: -1)
