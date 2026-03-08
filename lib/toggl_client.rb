@@ -1,0 +1,126 @@
+# frozen_string_literal: true
+
+require "net/http"
+require "json"
+require "uri"
+require "time"
+
+class TogglClient
+  BASE_URL = "https://api.track.toggl.com/api/v9"
+  CREATED_WITH = "toggl-track-mcp-server"
+
+  def initialize(api_token = ENV.fetch("TOGGL_API_TOKEN"))
+    @api_token = api_token
+    @workspace_id = nil
+  end
+
+  def workspace_id
+    @workspace_id ||= get("/me").fetch("default_workspace_id")
+  end
+
+  def current_entry
+    get("/me/time_entries/current")
+  end
+
+  def today_entries
+    today = Time.now.strftime("%Y-%m-%d")
+    get("/me/time_entries", start_date: today, end_date: today)
+  end
+
+  def create_entry(description:, project_id: nil, tags: nil, start: nil, duration: -1)
+    body = {
+      description: description,
+      workspace_id: workspace_id,
+      start: start || Time.now.utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+      duration: duration,
+      created_with: CREATED_WITH,
+    }
+    body[:project_id] = project_id if project_id
+    body[:tags] = tags if tags
+
+    post("/workspaces/#{workspace_id}/time_entries", body)
+  end
+
+  def update_entry(time_entry_id:, **params)
+    body = {}
+    body[:description] = params[:description] if params.key?(:description)
+    body[:project_id] = params[:project_id] if params.key?(:project_id)
+    body[:tags] = params[:tags] if params.key?(:tags)
+
+    put("/workspaces/#{workspace_id}/time_entries/#{time_entry_id}", body)
+  end
+
+  def delete_entry(time_entry_id:)
+    delete("/workspaces/#{workspace_id}/time_entries/#{time_entry_id}")
+  end
+
+  def stop_entry(time_entry_id:)
+    patch("/workspaces/#{workspace_id}/time_entries/#{time_entry_id}/stop")
+  end
+
+  def projects
+    get("/workspaces/#{workspace_id}/projects")
+  end
+
+  private
+
+  def get(path, params = {})
+    uri = build_uri(path, params)
+    request = Net::HTTP::Get.new(uri)
+    execute(uri, request)
+  end
+
+  def post(path, body)
+    uri = build_uri(path)
+    request = Net::HTTP::Post.new(uri)
+    request.body = JSON.generate(body)
+    request["Content-Type"] = "application/json"
+    execute(uri, request)
+  end
+
+  def put(path, body)
+    uri = build_uri(path)
+    request = Net::HTTP::Put.new(uri)
+    request.body = JSON.generate(body)
+    request["Content-Type"] = "application/json"
+    execute(uri, request)
+  end
+
+  def patch(path, body = nil)
+    uri = build_uri(path)
+    request = Net::HTTP::Patch.new(uri)
+    if body
+      request.body = JSON.generate(body)
+      request["Content-Type"] = "application/json"
+    end
+    execute(uri, request)
+  end
+
+  def delete(path)
+    uri = build_uri(path)
+    request = Net::HTTP::Delete.new(uri)
+    execute(uri, request)
+  end
+
+  def build_uri(path, params = {})
+    uri = URI("#{BASE_URL}#{path}")
+    uri.query = URI.encode_www_form(params) unless params.empty?
+    uri
+  end
+
+  def execute(uri, request)
+    request.basic_auth(@api_token, "api_token")
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    case response
+    when Net::HTTPSuccess
+      return nil if response.body.nil? || response.body.empty?
+      JSON.parse(response.body)
+    else
+      raise "Toggl API error: #{response.code} #{response.body}"
+    end
+  end
+end
