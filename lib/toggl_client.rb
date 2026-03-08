@@ -46,6 +46,8 @@ class TogglClient
     body[:description] = params[:description] if params.key?(:description)
     body[:project_id] = params[:project_id] if params.key?(:project_id)
     body[:tags] = params[:tags] if params.key?(:tags)
+    body[:start] = params[:start] if params.key?(:start)
+    body[:stop] = params[:stop] if params.key?(:stop)
 
     put("/workspaces/#{workspace_id}/time_entries/#{time_entry_id}", body)
   end
