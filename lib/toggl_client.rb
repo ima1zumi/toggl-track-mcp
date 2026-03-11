@@ -24,9 +24,9 @@ class TogglClient
 
   def today_entries
     today = Time.now
-    start_date = today.strftime("%Y-%m-%d")
-    end_date = (today + 86400).strftime("%Y-%m-%d")
-    get("/me/time_entries", start_date: start_date, end_date: end_date)
+    start_of_day = Time.new(today.year, today.month, today.day, 0, 0, 0, today.utc_offset)
+    end_of_day = start_of_day + 86400
+    get("/me/time_entries", start_date: start_of_day.iso8601, end_date: end_of_day.iso8601)
   end
 
   def create_entry(description:, project_id: nil, tags: nil, start: nil, duration: -1)
