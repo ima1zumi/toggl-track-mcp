@@ -9,9 +9,13 @@ class TogglClient
   BASE_URL = "https://api.track.toggl.com/api/v9"
   CREATED_WITH = "toggl-track-mcp-server"
 
-  def initialize(api_token = ENV.fetch("TOGGL_API_TOKEN"))
+  attr_reader :tz
+
+  def initialize(api_token = ENV.fetch("TOGGL_API_TOKEN"), tz: ENV.fetch("TOGGL_TZ", "+09:00"))
     @api_token = api_token
+    @tz = tz
     @workspace_id = nil
+    @project_map = nil
   end
 
   def workspace_id
@@ -22,11 +26,25 @@ class TogglClient
     get("/me/time_entries/current")
   end
 
+  def project_map
+    @project_map ||= projects.each_with_object({}) { |p, h| h[p["id"]] = p["name"] }
+  end
+
+  def project_name(project_id)
+    return nil unless project_id
+
+    project_map[project_id]
+  end
+
   def today_entries
-    today = Time.now
-    start_of_day = Time.new(today.year, today.month, today.day, 0, 0, 0, today.utc_offset)
+    today = Time.now.getlocal(@tz)
+    start_of_day = Time.new(today.year, today.month, today.day, 0, 0, 0, @tz)
     end_of_day = start_of_day + 86400
     get("/me/time_entries", start_date: start_of_day.iso8601, end_date: end_of_day.iso8601)
+  end
+
+  def entries_by_date(start_date:, end_date:)
+    get("/me/time_entries", start_date: start_date, end_date: end_date)
   end
 
   def create_entry(description:, project_id: nil, tags: nil, start: nil, duration: -1)
