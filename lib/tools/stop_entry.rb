@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 require "mcp"
+require_relative "../duration_formatter"
 
 class StopEntry < MCP::Tool
+  extend DurationFormatter
+
   description "Stop the currently running timer"
 
   input_schema(properties: {})
@@ -18,22 +21,21 @@ class StopEntry < MCP::Tool
 
       entry = client.stop_entry(time_entry_id: current["id"])
 
+      tz = client.tz
       elapsed = Time.now.to_i - Time.parse(entry["start"]).to_i
       text = "Timer stopped:\n"
       text += "  Description: #{entry["description"] || "(no description)"}\n"
-      text += "  Duration: #{format_duration(elapsed)}\n"
+      if entry["project_id"]
+        name = client.project_name(entry["project_id"])
+        text += "  Project: #{name}\n" if name
+        text += "  Project ID: #{entry["project_id"]}\n"
+      end
+      text += "  Start: #{format_time(entry["start"], tz: tz)}\n"
+      text += "  Stop: #{format_time(entry["stop"], tz: tz)}\n" if entry["stop"]
+      text += "  Duration: #{format_duration_human(elapsed)}\n"
       text += "  Entry ID: #{entry["id"]}"
 
       MCP::Tool::Response.new([{ type: "text", text: text }])
-    end
-
-    private
-
-    def format_duration(seconds)
-      hours = seconds / 3600
-      minutes = (seconds % 3600) / 60
-      secs = seconds % 60
-      format("%<h>d:%<m>02d:%<s>02d", h: hours, m: minutes, s: secs)
     end
   end
 end

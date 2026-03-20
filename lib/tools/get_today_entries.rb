@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 require "mcp"
+require_relative "../duration_formatter"
 
 class GetTodayEntries < MCP::Tool
+  extend DurationFormatter
+
   description "Get all time entries for today"
 
   annotations(
@@ -21,6 +24,7 @@ class GetTodayEntries < MCP::Tool
         return MCP::Tool::Response.new([{ type: "text", text: "No time entries for today." }])
       end
 
+      tz = client.tz
       total_seconds = 0
       lines = entries.map do |entry|
         duration = entry["duration"]
@@ -33,29 +37,24 @@ class GetTodayEntries < MCP::Tool
 
         parts = []
         parts << "  Description: #{entry["description"] || "(no description)"}"
-        parts << "  Project ID: #{entry["project_id"]}" if entry["project_id"]
+        if entry["project_id"]
+          name = client.project_name(entry["project_id"])
+          parts << "  Project: #{name}" if name
+          parts << "  Project ID: #{entry["project_id"]}"
+        end
         parts << "  Tags: #{entry["tags"].join(", ")}" if entry["tags"]&.any?
-        parts << "  Start: #{entry["start"]}"
-        parts << "  Stop: #{entry["stop"]}" if entry["stop"]
-        parts << "  Duration: #{format_duration(duration)}"
+        parts << "  Start: #{format_time(entry["start"], tz: tz)}"
+        parts << "  Stop: #{format_time(entry["stop"], tz: tz)}" if entry["stop"]
+        parts << "  Duration: #{format_duration_human(duration)}"
         parts << "  Running" if entry["duration"] < 0
         parts << "  Entry ID: #{entry["id"]}"
         parts.join("\n")
       end
 
-      text = "Today's entries (#{entries.size} total, #{format_duration(total_seconds)}):\n\n"
+      text = "Today's entries (#{entries.size} total, #{format_duration_human(total_seconds)}):\n\n"
       text += lines.join("\n\n")
 
       MCP::Tool::Response.new([{ type: "text", text: text }])
-    end
-
-    private
-
-    def format_duration(seconds)
-      hours = seconds / 3600
-      minutes = (seconds % 3600) / 60
-      secs = seconds % 60
-      format("%<h>d:%<m>02d:%<s>02d", h: hours, m: minutes, s: secs)
     end
   end
 end
