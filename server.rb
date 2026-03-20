@@ -9,6 +9,8 @@ require_relative "lib/tools/update_entry"
 require_relative "lib/tools/delete_entry"
 require_relative "lib/tools/stop_entry"
 require_relative "lib/tools/get_projects"
+require_relative "lib/tools/get_daily_summary"
+require_relative "lib/tools/get_entries_by_date"
 
 server = MCP::Server.new(
   name: "toggl-track",
@@ -21,6 +23,8 @@ server = MCP::Server.new(
     DeleteEntry,
     StopEntry,
     GetProjects,
+    GetDailySummary,
+    GetEntriesByDate,
   ],
   server_context: { client: TogglClient.new },
 )
