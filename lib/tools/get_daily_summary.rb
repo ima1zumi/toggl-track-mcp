@@ -62,7 +62,7 @@ class GetDailySummary < MCP::Tool
         project = client.project_name(entry["project_id"])
         label = project || description
 
-        "#{start_time} - #{stop_time} #{label}（#{format_duration_human(duration)}）\n"
+        "#{start_time} - #{stop_time} #{label} (#{format_duration_human(duration)})\n"
       end.join
     end
 
