@@ -7,7 +7,7 @@ require "time"
 
 class TogglClient
   BASE_URL = "https://api.track.toggl.com/api/v9"
-  CREATED_WITH = "toggl-track-mcp-server"
+  CREATED_WITH = "toggl-track-mcp"
 
   attr_reader :tz
 

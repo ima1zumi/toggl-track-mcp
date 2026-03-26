@@ -1,4 +1,4 @@
-# toggl-track-mcp-server
+# toggl-track-mcp
 
 An MCP server for Toggl Track.
 
@@ -23,7 +23,7 @@ Example configuration for Claude Desktop:
     "toggl-track": {
       "command": "ruby",
       "args": ["server.rb"],
-      "cwd": "/path/to/toggl-track-mcp-server",
+      "cwd": "/path/to/toggl-track-mcp",
       "env": {
         "TOGGL_API_TOKEN": "your_api_token_here"
       }
