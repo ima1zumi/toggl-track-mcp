@@ -4,15 +4,15 @@ require "time"
 
 module DurationFormatter
   def format_duration_human(seconds)
-    return "0分" if seconds <= 0
+    return "0min" if seconds <= 0
 
     hours = seconds / 3600
     minutes = (seconds % 3600) / 60
 
     if hours > 0
-      "#{hours}時間#{minutes}分"
+      "#{hours}h#{minutes}min"
     else
-      "#{minutes}分"
+      "#{minutes}min"
     end
   end
 

@@ -41,7 +41,7 @@ class GetCurrentEntry < MCP::Tool
       lines << "Tags: #{entry["tags"].join(", ")}" if entry["tags"]&.any?
 
       elapsed = Time.now.to_i - Time.parse(entry["start"]).to_i
-      lines << "Start: #{format_time(entry["start"], tz: tz)}（#{format_duration_human(elapsed)}経過）"
+      lines << "Start: #{format_time(entry["start"], tz: tz)} (#{format_duration_human(elapsed)} elapsed)"
 
       lines << "Entry ID: #{entry["id"]}"
       lines.join("\n")
