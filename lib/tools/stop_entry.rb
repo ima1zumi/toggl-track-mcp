@@ -23,17 +23,17 @@ class StopEntry < MCP::Tool
 
       tz = client.tz
       elapsed = Time.now.to_i - Time.parse(entry["start"]).to_i
-      text = "Timer stopped:\n"
-      text += "  Description: #{entry["description"] || "(no description)"}\n"
-      if entry["project_id"]
-        name = client.project_name(entry["project_id"])
-        text += "  Project: #{name}\n" if name
-        text += "  Project ID: #{entry["project_id"]}\n"
-      end
-      text += "  Start: #{format_time(entry["start"], tz: tz)}\n"
-      text += "  Stop: #{format_time(entry["stop"], tz: tz)}\n" if entry["stop"]
-      text += "  Duration: #{format_duration_human(elapsed)}\n"
-      text += "  Entry ID: #{entry["id"]}"
+      project_name = entry["project_id"] ? client.project_name(entry["project_id"]) : nil
+      text = <<~TEXT.gsub(/^\s*\n/, "").chomp
+        Timer stopped:
+          Description: #{entry["description"] || "(no description)"}
+        #{"  Project: #{project_name}" if project_name}
+        #{"  Project ID: #{entry["project_id"]}" if entry["project_id"]}
+          Start: #{format_time(entry["start"], tz: tz)}
+        #{"  Stop: #{format_time(entry["stop"], tz: tz)}" if entry["stop"]}
+          Duration: #{format_duration_human(elapsed)}
+          Entry ID: #{entry["id"]}
+      TEXT
 
       MCP::Tool::Response.new([{ type: "text", text: text }])
     end

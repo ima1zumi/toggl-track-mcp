@@ -22,15 +22,18 @@ class GetProjects < MCP::Tool
       end
 
       lines = projects.select { |p| p["active"] }.map do |project|
-        parts = []
-        parts << "  Name: #{project["name"]}"
-        parts << "  ID: #{project["id"]}"
-        parts << "  Color: #{project["color"]}" if project["color"]
-        parts.join("\n")
+        <<~TEXT.gsub(/^\s*\n/, "").chomp
+            Name: #{project["name"]}
+            ID: #{project["id"]}
+          #{"  Color: #{project["color"]}" if project["color"]}
+        TEXT
       end
 
-      text = "Projects (#{lines.size}):\n\n"
-      text += lines.join("\n\n")
+      text = <<~TEXT.chomp
+        Projects (#{lines.size}):
+
+        #{lines.join("\n\n")}
+      TEXT
 
       MCP::Tool::Response.new([{ type: "text", text: text }])
     end

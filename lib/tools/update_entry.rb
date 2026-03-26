@@ -56,13 +56,15 @@ class UpdateEntry < MCP::Tool
 
       entry = client.update_entry(time_entry_id: time_entry_id, **params)
 
-      text = "Entry updated:\n"
-      text += "  Description: #{entry["description"] || "(no description)"}\n"
-      text += "  Project ID: #{entry["project_id"]}\n" if entry["project_id"]
-      text += "  Tags: #{entry["tags"].join(", ")}\n" if entry["tags"]&.any?
-      text += "  Start: #{entry["start"]}\n" if entry["start"]
-      text += "  Stop: #{entry["stop"]}\n" if entry["stop"]
-      text += "  Entry ID: #{entry["id"]}"
+      text = <<~TEXT.gsub(/^\s*\n/, "").chomp
+        Entry updated:
+          Description: #{entry["description"] || "(no description)"}
+        #{"  Project ID: #{entry["project_id"]}" if entry["project_id"]}
+        #{"  Tags: #{entry["tags"].join(", ")}" if entry["tags"]&.any?}
+        #{"  Start: #{entry["start"]}" if entry["start"]}
+        #{"  Stop: #{entry["stop"]}" if entry["stop"]}
+          Entry ID: #{entry["id"]}
+      TEXT
 
       MCP::Tool::Response.new([{ type: "text", text: text }])
     end

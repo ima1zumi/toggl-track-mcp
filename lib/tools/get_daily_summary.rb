@@ -41,11 +41,15 @@ class GetDailySummary < MCP::Tool
       project_summary = build_project_summary(sorted, client)
       total = sorted.sum { |e| entry_duration(e) }
 
-      text = "## Timeline\n"
-      text += timeline
-      text += "\n## By Project\n"
-      text += project_summary
-      text += "\nTotal: #{format_duration_human(total)}\n"
+      text = <<~TEXT
+        ## Timeline
+        #{timeline.chomp}
+
+        ## By Project
+        #{project_summary.chomp}
+
+        Total: #{format_duration_human(total)}
+      TEXT
 
       MCP::Tool::Response.new([{ type: "text", text: text }])
     end

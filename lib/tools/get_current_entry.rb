@@ -31,21 +31,18 @@ class GetCurrentEntry < MCP::Tool
 
     def format_entry(entry, client)
       tz = client.tz
-      lines = []
-      lines << "Description: #{entry["description"] || "(no description)"}"
-      if entry["project_id"]
-        name = client.project_name(entry["project_id"])
-        lines << "Project: #{name}" if name
-        lines << "Project ID: #{entry["project_id"]}"
-      end
-      lines << "Tags: #{entry["tags"].join(", ")}" if entry["tags"]&.any?
-
       start_time = Time.parse(entry["start"])
       elapsed = Time.now.to_i - start_time.to_i
-      lines << "Start: #{start_time.getlocal(tz).strftime("%H:%M")} (#{format_duration_human(elapsed)} elapsed)"
+      project_name = entry["project_id"] ? client.project_name(entry["project_id"]) : nil
 
-      lines << "Entry ID: #{entry["id"]}"
-      lines.join("\n")
+      <<~TEXT.gsub(/^\s*\n/, "").chomp
+        Description: #{entry["description"] || "(no description)"}
+        #{"Project: #{project_name}" if project_name}
+        #{"Project ID: #{entry["project_id"]}" if entry["project_id"]}
+        #{"Tags: #{entry["tags"].join(", ")}" if entry["tags"]&.any?}
+        Start: #{start_time.getlocal(tz).strftime("%H:%M")} (#{format_duration_human(elapsed)} elapsed)
+        Entry ID: #{entry["id"]}
+      TEXT
     end
   end
 end

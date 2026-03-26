@@ -45,12 +45,14 @@ class CreateEntry < MCP::Tool
       )
 
       status = duration == -1 ? "Timer started" : "Entry created"
-      text = "#{status}:\n"
-      text += "  Description: #{entry["description"]}\n"
-      text += "  Project ID: #{entry["project_id"]}\n" if entry["project_id"]
-      text += "  Tags: #{entry["tags"].join(", ")}\n" if entry["tags"]&.any?
-      text += "  Start: #{entry["start"]}\n"
-      text += "  Entry ID: #{entry["id"]}"
+      text = <<~TEXT.gsub(/^\s*\n/, "").chomp
+        #{status}:
+          Description: #{entry["description"]}
+        #{"  Project ID: #{entry["project_id"]}" if entry["project_id"]}
+        #{"  Tags: #{entry["tags"].join(", ")}" if entry["tags"]&.any?}
+          Start: #{entry["start"]}
+          Entry ID: #{entry["id"]}
+      TEXT
 
       MCP::Tool::Response.new([{ type: "text", text: text }])
     end

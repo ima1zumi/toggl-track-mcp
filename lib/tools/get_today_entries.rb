@@ -35,24 +35,25 @@ class GetTodayEntries < MCP::Tool
           total_seconds += duration
         end
 
-        parts = []
-        parts << "  Description: #{entry["description"] || "(no description)"}"
-        if entry["project_id"]
-          name = client.project_name(entry["project_id"])
-          parts << "  Project: #{name}" if name
-          parts << "  Project ID: #{entry["project_id"]}"
-        end
-        parts << "  Tags: #{entry["tags"].join(", ")}" if entry["tags"]&.any?
-        parts << "  Start: #{format_time(entry["start"], tz: tz)}"
-        parts << "  Stop: #{format_time(entry["stop"], tz: tz)}" if entry["stop"]
-        parts << "  Duration: #{format_duration_human(duration)}"
-        parts << "  Running" if entry["duration"] < 0
-        parts << "  Entry ID: #{entry["id"]}"
-        parts.join("\n")
+        project_name = entry["project_id"] ? client.project_name(entry["project_id"]) : nil
+        <<~TEXT.gsub(/^\s*\n/, "").chomp
+            Description: #{entry["description"] || "(no description)"}
+          #{"  Project: #{project_name}" if project_name}
+          #{"  Project ID: #{entry["project_id"]}" if entry["project_id"]}
+          #{"  Tags: #{entry["tags"].join(", ")}" if entry["tags"]&.any?}
+            Start: #{format_time(entry["start"], tz: tz)}
+          #{"  Stop: #{format_time(entry["stop"], tz: tz)}" if entry["stop"]}
+            Duration: #{format_duration_human(duration)}
+          #{"  Running" if entry["duration"] < 0}
+            Entry ID: #{entry["id"]}
+        TEXT
       end
 
-      text = "Today's entries (#{entries.size} total, #{format_duration_human(total_seconds)}):\n\n"
-      text += lines.join("\n\n")
+      text = <<~TEXT.chomp
+        Today's entries (#{entries.size} total, #{format_duration_human(total_seconds)}):
+
+        #{lines.join("\n\n")}
+      TEXT
 
       MCP::Tool::Response.new([{ type: "text", text: text }])
     end
