@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "toggl_track_mcp"
+
+server = MCP::Server.new(
+  name: "toggl-track",
+  version: TogglTrackMcp::VERSION,
+  tools: TogglTrackMcp::TOOLS,
+  server_context: { client: TogglTrackMcp::TogglClient.new },
+)
+
+MCP::Server::Transports::StdioTransport.new(server).open
