@@ -2,14 +2,21 @@
 
 An MCP server for Toggl Track.
 
+## Installation
+
+```
+gem install toggl_track_mcp
+```
+
+Or add to your Gemfile:
+
+```ruby
+gem "toggl_track_mcp"
+```
+
 ## Setup
 
-```
-bundle install
-cp .env.example .env
-```
-
-Set your Toggl Track API token in `.env`. You can find it at [Toggl Track Profile](https://track.toggl.com/profile).
+Set your Toggl Track API token as the environment variable `TOGGL_API_TOKEN`. You can find it at [Toggl Track Profile](https://track.toggl.com/profile).
 
 `TOGGL_TZ` is the timezone offset (default: `+09:00`).
 
@@ -21,9 +28,7 @@ Example configuration for Claude Desktop:
 {
   "mcpServers": {
     "toggl-track": {
-      "command": "ruby",
-      "args": ["server.rb"],
-      "cwd": "/path/to/toggl-track-mcp",
+      "command": "toggl-track-mcp",
       "env": {
         "TOGGL_API_TOKEN": "your_api_token_here"
       }
