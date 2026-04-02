@@ -5,11 +5,15 @@ require "mcp"
 module TogglTrackMcp
   module Tools
     class GetProjects < MCP::Tool
+      tool_name "get_projects"
+      title "Get Projects"
       description "Get all projects in the workspace"
 
       annotations(
         read_only_hint: true,
         destructive_hint: false,
+        idempotent_hint: true,
+        open_world_hint: true,
       )
 
       input_schema(properties: {})
@@ -20,7 +24,7 @@ module TogglTrackMcp
           projects = client.projects
 
           if projects.nil? || projects.empty?
-            return MCP::Tool::Response.new([{ type: "text", text: "No projects found." }])
+            return MCP::Tool::Response.new([MCP::Content::Text.new("No projects found.")])
           end
 
           lines = projects.select { |p| p["active"] }.map do |project|
@@ -37,7 +41,7 @@ module TogglTrackMcp
             #{lines.join("\n\n")}
           TEXT
 
-          MCP::Tool::Response.new([{ type: "text", text: text }])
+          MCP::Tool::Response.new([MCP::Content::Text.new(text)])
         end
       end
     end

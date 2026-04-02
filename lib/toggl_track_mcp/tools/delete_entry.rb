@@ -5,10 +5,15 @@ require "mcp"
 module TogglTrackMcp
   module Tools
     class DeleteEntry < MCP::Tool
+      tool_name "delete_entry"
+      title "Delete Entry"
       description "Delete a time entry"
 
       annotations(
+        read_only_hint: false,
         destructive_hint: true,
+        idempotent_hint: true,
+        open_world_hint: true,
       )
 
       input_schema(
@@ -26,7 +31,7 @@ module TogglTrackMcp
           client = server_context[:client]
           client.delete_entry(time_entry_id: time_entry_id)
 
-          MCP::Tool::Response.new([{ type: "text", text: "Time entry #{time_entry_id} deleted." }])
+          MCP::Tool::Response.new([MCP::Content::Text.new("Time entry #{time_entry_id} deleted.")])
         end
       end
     end

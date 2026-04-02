@@ -5,7 +5,16 @@ require "mcp"
 module TogglTrackMcp
   module Tools
     class CreateEntry < MCP::Tool
+      tool_name "create_entry"
+      title "Create Entry"
       description "Create a new time entry. By default starts a running timer."
+
+      annotations(
+        read_only_hint: false,
+        destructive_hint: false,
+        idempotent_hint: false,
+        open_world_hint: true,
+      )
 
       input_schema(
         properties: {
@@ -56,7 +65,7 @@ module TogglTrackMcp
               Entry ID: #{entry["id"]}
           TEXT
 
-          MCP::Tool::Response.new([{ type: "text", text: text }])
+          MCP::Tool::Response.new([MCP::Content::Text.new(text)])
         end
       end
     end

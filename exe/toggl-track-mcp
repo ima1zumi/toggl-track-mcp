@@ -5,9 +5,22 @@ require "toggl_track_mcp"
 
 server = MCP::Server.new(
   name: "toggl-track",
+  title: "Toggl Track",
+  description: "MCP server for managing Toggl Track time entries",
   version: TogglTrackMcp::VERSION,
+  instructions: <<~INSTRUCTIONS.chomp,
+    This server provides tools to interact with Toggl Track time tracking.
+    Use get_current_entry to check if a timer is running before starting a new one.
+    Use get_projects to find project IDs before creating entries with a project.
+    Date parameters accept "today", "yesterday", or "YYYY-MM-DD" format.
+    Times are displayed in the configured timezone (default: +09:00).
+  INSTRUCTIONS
   tools: TogglTrackMcp::TOOLS,
+  prompts: TogglTrackMcp::PROMPTS,
   server_context: { client: TogglTrackMcp::TogglClient.new },
+  configuration: MCP::Configuration.new(
+    exception_reporter: ->(exception) { $stderr.puts("#{exception.class}: #{exception.message}") },
+  ),
 )
 
 MCP::Server::Transports::StdioTransport.new(server).open

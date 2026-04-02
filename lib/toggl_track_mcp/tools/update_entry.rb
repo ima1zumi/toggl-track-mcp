@@ -5,7 +5,16 @@ require "mcp"
 module TogglTrackMcp
   module Tools
     class UpdateEntry < MCP::Tool
+      tool_name "update_entry"
+      title "Update Entry"
       description "Update an existing time entry"
+
+      annotations(
+        read_only_hint: false,
+        destructive_hint: false,
+        idempotent_hint: true,
+        open_world_hint: true,
+      )
 
       input_schema(
         properties: {
@@ -51,7 +60,7 @@ module TogglTrackMcp
 
           if params.empty?
             return MCP::Tool::Response.new(
-              [{ type: "text", text: "No fields to update. Provide at least one of: description, project_id, tags, start, stop." }],
+              [MCP::Content::Text.new("No fields to update. Provide at least one of: description, project_id, tags, start, stop.")],
               error: true,
             )
           end
@@ -68,7 +77,7 @@ module TogglTrackMcp
               Entry ID: #{entry["id"]}
           TEXT
 
-          MCP::Tool::Response.new([{ type: "text", text: text }])
+          MCP::Tool::Response.new([MCP::Content::Text.new(text)])
         end
       end
     end

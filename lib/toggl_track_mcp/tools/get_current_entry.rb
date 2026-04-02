@@ -7,11 +7,15 @@ module TogglTrackMcp
     class GetCurrentEntry < MCP::Tool
       extend DurationFormatter
 
+      tool_name "get_current_entry"
+      title "Get Current Entry"
       description "Get the currently running time entry"
 
       annotations(
         read_only_hint: true,
         destructive_hint: false,
+        idempotent_hint: true,
+        open_world_hint: true,
       )
 
       input_schema(properties: {})
@@ -22,10 +26,10 @@ module TogglTrackMcp
           entry = client.current_entry
 
           if entry.nil?
-            return MCP::Tool::Response.new([{ type: "text", text: "No timer is currently running." }])
+            return MCP::Tool::Response.new([MCP::Content::Text.new("No timer is currently running.")])
           end
 
-          MCP::Tool::Response.new([{ type: "text", text: format_entry(entry, client) }])
+          MCP::Tool::Response.new([MCP::Content::Text.new(format_entry(entry, client))])
         end
 
         private

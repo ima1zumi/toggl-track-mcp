@@ -12,6 +12,8 @@ require_relative "toggl_track_mcp/tools/create_entry"
 require_relative "toggl_track_mcp/tools/update_entry"
 require_relative "toggl_track_mcp/tools/stop_entry"
 require_relative "toggl_track_mcp/tools/delete_entry"
+require_relative "toggl_track_mcp/prompts/daily_report"
+require_relative "toggl_track_mcp/prompts/weekly_summary"
 
 module TogglTrackMcp
   TOOLS = [
@@ -24,5 +26,10 @@ module TogglTrackMcp
     Tools::UpdateEntry,
     Tools::StopEntry,
     Tools::DeleteEntry,
+  ].freeze
+
+  PROMPTS = [
+    Prompts::DailyReport,
+    Prompts::WeeklySummary,
   ].freeze
 end

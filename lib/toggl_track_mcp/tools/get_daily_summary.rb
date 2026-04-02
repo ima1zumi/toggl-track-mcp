@@ -7,11 +7,15 @@ module TogglTrackMcp
     class GetDailySummary < MCP::Tool
       extend DurationFormatter
 
+      tool_name "get_daily_summary"
+      title "Get Daily Summary"
       description "Get a formatted daily summary of time entries for diary/journal use."
 
       annotations(
         read_only_hint: true,
         destructive_hint: false,
+        idempotent_hint: true,
+        open_world_hint: true,
       )
 
       input_schema(
@@ -33,7 +37,7 @@ module TogglTrackMcp
           entries = client.entries_by_date(start_date: start_of_day.iso8601, end_date: end_of_day)
 
           if entries.nil? || entries.empty?
-            return MCP::Tool::Response.new([{ type: "text", text: "No time entries found." }])
+            return MCP::Tool::Response.new([MCP::Content::Text.new("No time entries found.")])
           end
 
           sorted = entries.sort_by { |e| e["start"] }
@@ -52,7 +56,7 @@ module TogglTrackMcp
             Total: #{format_duration_human(total)}
           TEXT
 
-          MCP::Tool::Response.new([{ type: "text", text: text }])
+          MCP::Tool::Response.new([MCP::Content::Text.new(text)])
         end
 
         private

@@ -7,11 +7,15 @@ module TogglTrackMcp
     class GetEntriesByDate < MCP::Tool
       extend DurationFormatter
 
+      tool_name "get_entries_by_date"
+      title "Get Entries by Date"
       description "Get time entries by date or date range"
 
       annotations(
         read_only_hint: true,
         destructive_hint: false,
+        idempotent_hint: true,
+        open_world_hint: true,
       )
 
       input_schema(
@@ -42,7 +46,7 @@ module TogglTrackMcp
           )
 
           if entries.nil? || entries.empty?
-            return MCP::Tool::Response.new([{ type: "text", text: "No time entries found." }])
+            return MCP::Tool::Response.new([MCP::Content::Text.new("No time entries found.")])
           end
 
           total_seconds = 0
@@ -75,7 +79,7 @@ module TogglTrackMcp
             #{lines.join("\n\n")}
           TEXT
 
-          MCP::Tool::Response.new([{ type: "text", text: text }])
+          MCP::Tool::Response.new([MCP::Content::Text.new(text)])
         end
       end
     end

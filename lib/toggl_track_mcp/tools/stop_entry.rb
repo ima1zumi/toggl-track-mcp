@@ -7,7 +7,16 @@ module TogglTrackMcp
     class StopEntry < MCP::Tool
       extend DurationFormatter
 
+      tool_name "stop_entry"
+      title "Stop Entry"
       description "Stop the currently running timer"
+
+      annotations(
+        read_only_hint: false,
+        destructive_hint: false,
+        idempotent_hint: true,
+        open_world_hint: true,
+      )
 
       input_schema(properties: {})
 
@@ -17,7 +26,7 @@ module TogglTrackMcp
           current = client.current_entry
 
           if current.nil?
-            return MCP::Tool::Response.new([{ type: "text", text: "No timer is currently running." }])
+            return MCP::Tool::Response.new([MCP::Content::Text.new("No timer is currently running.")])
           end
 
           entry = client.stop_entry(time_entry_id: current["id"])
@@ -36,7 +45,7 @@ module TogglTrackMcp
               Entry ID: #{entry["id"]}
           TEXT
 
-          MCP::Tool::Response.new([{ type: "text", text: text }])
+          MCP::Tool::Response.new([MCP::Content::Text.new(text)])
         end
       end
     end
